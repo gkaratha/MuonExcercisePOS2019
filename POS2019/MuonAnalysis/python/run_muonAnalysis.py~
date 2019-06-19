@@ -1,0 +1,83 @@
+import FWCore.ParameterSet.Config as cms
+#quick config
+
+
+IsData=False
+Path="HLT_Mu9_IP6_part"
+Nentries=10000;  output="output_Data_valnew.root"; 
+mlog=100
+MuPtMin=2.0; MuMu=dict(MinM=0,MaxM=5,PtMin=0,Vtx=True);
+SkipEvtWithNoFire=True;
+File=[
+'/store/data/Run2018D/ParkingBPH4/MINIAOD/20Mar2019-v1/110000/A336D5D0-93A3-D944-A82A-8FA4165A5B2B.root'
+]
+############
+   
+
+globaltag='102X_upgrade2018_realistic_v15' 
+if IsData:
+   print "We have established we Run on data using HLT",Path
+   globaltag='101X_dataRun2_Prompt_v11'     
+else:
+   print "We have established we Run on MC"
+
+print "Run parameters ",globaltag,""
+
+process = cms.Process("Demo")
+
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
+
+process.MessageLogger.cerr.FwkReport.reportEvery = nlog
+
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+from Configuration.AlCa.GlobalTag import GlobalTag
+process.GlobalTag = GlobalTag(process.GlobalTag,globaltag, '')
+
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(Nentries) )
+
+process.source = cms.Source("PoolSource",
+    # replace 'myfile.root' with the source file you want to use
+    fileNames = cms.untracked.vstring(
+    File ),
+   secondaryFileNames=cms.untracked.vstring(),
+   inputCommands=cms.untracked.vstring(
+                  'keep *',
+                  'drop *_ctppsPixelClusters_*_*')
+
+)
+
+process.demo = cms.EDAnalyzer('MuonAnalysisb',
+                              beamSpot = cms.InputTag('offlineBeamSpot'),
+                              vertices     = cms.InputTag("offlineSlimmedPrimaryVertices"),
+                              Path=cms.string(n1),
+                              triggerobjects = cms.InputTag('slimmedPatTrigger','','RECO'),                   
+                              muons=cms.InputTag("slimmedMuons"),
+                              l1muons=cms.InputTag("gmtStage2Digis","Muon","RECO"),
+                              packed = cms.InputTag("packedGenParticles"),
+                              HLTPath=cms.string(Path)
+
+                               RunParameters = cms.PSet(
+      Data= cms.bool(IsData),SkipEvtWithNoFire=cms.bool(SkipEvtWithNoFire),
+      MuonPtCut=cms.double(MuPtMin),
+      ReconstructMuMuVtx=cms.double(MuMu["Vtx"]), 
+      McutMin=cms.double(MuMu["MinM"]),McutMax=cms.double(MuMu["MaxM"]),
+      PtMuMuCut=cms.double(["PtMin"])
+
+  ),
+)
+
+
+
+process.TFileService = cms.Service("TFileService",
+                                   fileName = cms.string(output)
+                                   )
+process.fevt = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring(#"drop *",
+    ),
+    fileName = cms.untracked.string("edm_output.root"))
+
+process.p = cms.Path( process.demo )
+   
