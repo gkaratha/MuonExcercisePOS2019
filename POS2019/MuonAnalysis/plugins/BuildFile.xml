@@ -17,5 +17,8 @@
  <use name="TrackingTools/PatternTools"/>
  <use name="TrackingTools/TransientTrack"/>
  <use name="DataFormats/MuonReco"/>
+ <use name="RecoVertex/KinematicFit"/>
+ <use name="RecoVertex/KinematicFitPrimitives"/>
+ <use name="SimTracker/TrackAssociation"/>
  <flags EDM_PLUGIN="1"/>
 </library>
