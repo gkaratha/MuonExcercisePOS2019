@@ -14,6 +14,7 @@
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
+#include "iostream"
 using std::vector;
 
 class MuonTnP {
@@ -137,7 +138,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop(float tagPt, float probePt, float mllDiff, float tagIso, float probeIso, int maxEvts);
+   virtual void     Loop(float tagPt, float probePt, float etaCut, float mLow, float mUp, float tagIso, float probeIso, int maxEvts, TString outFile, bool isJpsi = false);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 
@@ -297,6 +298,8 @@ void MuonTnP::Init(TTree *tree)
    fChain->SetBranchAddress("jpsi_mu2pt", &jpsi_mu2pt, &b_jpsi_mu2pt);
    fChain->SetBranchAddress("jpsi_mu2eta", &jpsi_mu2eta, &b_jpsi_mu2eta);
    fChain->SetBranchAddress("jpsi_mu2phi", &jpsi_mu2phi, &b_jpsi_mu2phi);
+
+   std::cout << "Loaded TTree with " << fChain->GetEntries() << " entries\n";
    Notify();
 }
 
